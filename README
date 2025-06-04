@@ -1,0 +1,18 @@
+> this is an educational project. don’t expect magic. or stability. or usefulness. seriously.
+
+# simple go lsp
+
+a tiny language server i built to learn go and understand how editors and tools use language servers to communicate.
+
+## what i (mostly) learned
+
+- basic go syntax and tooling
+- simple go project structure
+- how json-rpc 2.0 works
+- stdin/stdout communication
+- handling `initialize` and `initialized` messages
+- debugging lsp message flow
+
+---
+
+built as a learning experience, if it breaks, it's probably a feature.
