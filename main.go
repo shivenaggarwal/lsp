@@ -37,6 +37,13 @@ func HandleMessage(logger *log.Logger, method string, contents []byte) {
 			logger.Printf("hey, couldn't parse this: %s", err)
 			}
 			logger.Printf("Connected to: %s %s", request.Params.ClientInfo.Name, request.Params.ClientInfo.Version)
+
+			// once we know we have a message i.e a request our lsp should reply
+			msg := lsp.NewInitializeResponse(request.ID)
+			reply := rpc.EncodeMessage(msg)
+			writer := os.Stdout
+			writer.Write([]byte(reply)) // this is going to take the stdout of the current process and reply back with this a sequence of bytes
+			logger.Print("sent the reply")
 	}
 
 }
