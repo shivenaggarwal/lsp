@@ -27,7 +27,20 @@ type InitializeResult struct {
 	ServerInfo   ServerInfo         `json:"serverInfo"`
 }
 
-type ServerCapabilities struct {}
+type ServerCapabilities struct {
+	// TextDocumentSync int `json:"textDocumentSync"` // TODO incremental updates, etc
+	TextDocumentSync TextDocumentSyncOptions `json:"textDocumentSync"`
+}
+
+type TextDocumentSyncOptions struct {
+	OpenClose bool `json:"openClose"`
+	Change    int  `json:"change"` // 1 = Full, 2 = Incremental
+	Save      SaveOptions `json:"save"`
+}
+
+type SaveOptions struct {
+	IncludeText bool `json:"includeText"`
+}
 
 type ServerInfo struct {
 	Name    string `json:"name"`
@@ -40,8 +53,17 @@ func NewInitializeResponse(id int) InitializeResponse {
 			RPC: "2.0",
 			ID:  &id,
 		},
+			
 		Result: InitializeResult{
-			Capabilities: ServerCapabilities{},
+			Capabilities: ServerCapabilities{
+				TextDocumentSync: TextDocumentSyncOptions{
+					OpenClose: true,
+					Change:    1, // Full document sync
+					Save: SaveOptions{
+						IncludeText: true,
+					},
+				},
+			},
 			ServerInfo: ServerInfo{
 				Name:    "lsp",
 				Version: "0.0.1-beta1.final",

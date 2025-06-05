@@ -41,9 +41,24 @@ func HandleMessage(logger *log.Logger, method string, contents []byte) {
 			// once we know we have a message i.e a request our lsp should reply
 			msg := lsp.NewInitializeResponse(request.ID)
 			reply := rpc.EncodeMessage(msg)
+
+			// debugging
+			// logger.Printf("initialize response: %s", string(reply))
+
 			writer := os.Stdout
 			writer.Write([]byte(reply)) // this is going to take the stdout of the current process and reply back with this a sequence of bytes
 			logger.Print("sent the reply")
+
+		case "textDocument/didOpen":
+			var request lsp.DidOpenTextDocumentNotification
+			if err:= json.Unmarshal(contents, &request); err != nil {
+			logger.Printf("hey, couldn't parse this: %s", err)
+			}
+			logger.Printf("Opened: %s %s", request.Params.TextDocument.URI, request.Params.TextDocument.Text)
+			
+			// debugging
+			// logger.Printf("raw contents: %s", string(contents))
+		
 	}
 
 }
