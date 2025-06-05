@@ -30,6 +30,8 @@ type InitializeResult struct {
 type ServerCapabilities struct {
 	// TextDocumentSync int `json:"textDocumentSync"` // TODO incremental updates, etc
 	TextDocumentSync TextDocumentSyncOptions `json:"textDocumentSync"`
+
+	HoverProvider bool `json:"hoverProvider"`
 }
 
 type TextDocumentSyncOptions struct {
@@ -63,6 +65,7 @@ func NewInitializeResponse(id int) InitializeResponse {
 						IncludeText: true,
 					},
 				},
+				HoverProvider: true,
 			},
 			ServerInfo: ServerInfo{
 				Name:    "lsp",
