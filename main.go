@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"encoding/json"
+	"io"
 	"log"
 	"lsp/compiler"
 	"lsp/lsp"
@@ -17,7 +18,8 @@ func main() {
 	scanner := bufio.NewScanner(os.Stdin) // reading input from stdin
 	scanner.Split(rpc.Split)              // now this is going to be waiting on stdout for the new msg and once we get that the scanner will give use the text and then we can handle it below
 
-	state := compiler.NewState()
+	state := compiler.NewState()	
+	writer := os.Stdout
 
 	for scanner.Scan() { // basically saying keep on running it until we are ready
 		msg := scanner.Bytes()
@@ -26,11 +28,11 @@ func main() {
 			logger.Panicf("got an error: %s", err)
 			continue
 		}
-		HandleMessage(logger, state, method, contents)
+		HandleMessage(logger, writer, state, method, contents)
 	}
 }
 
-func HandleMessage(logger *log.Logger, state compiler.State, method string, contents []byte) {
+func HandleMessage(logger *log.Logger, writer io.Writer, state compiler.State, method string, contents []byte) {
 	logger.Printf("received message with method: %s", method) // this just makes sure everytime we get a message we print the message, lets us know are we decoding msg and passing them forward correctly
 	
 	switch method {
@@ -43,13 +45,12 @@ func HandleMessage(logger *log.Logger, state compiler.State, method string, cont
 
 			// once we know we have a message i.e a request our lsp should reply
 			msg := lsp.NewInitializeResponse(request.ID)
-			reply := rpc.EncodeMessage(msg)
 
+			writeResponse(writer, msg)
+			
 			// debugging
-			// logger.Printf("initialize response: %s", string(reply))
-
-			writer := os.Stdout
-			writer.Write([]byte(reply)) // this is going to take the stdout of the current process and reply back with this a sequence of bytes
+			// logger.Printf("initialize response: %s", string(reply))	
+			
 			logger.Print("sent the reply")
 
 		case "textDocument/didOpen":
@@ -73,12 +74,39 @@ func HandleMessage(logger *log.Logger, state compiler.State, method string, cont
 				state.UpdateDocument(request.Params.TextDocument.URI, change.Text)
 			}
 
+		case "textDocument/hover":
+			var request lsp.HoverRequest
+			if err:= json.Unmarshal(contents, &request); err != nil {
+			logger.Printf("textDocument/hover: %s", err)
+			return
+			}
+			
+			// create a response and write it back
+			response := lsp.HoverResponse{ // creating a response
+			Response: lsp.Response{
+				RPC: "2.0",
+				ID: &request.ID,
+			},
+			Result: lsp.HoverResult{
+				Contents: "hi from tiny lsp",
+			},
+			}
+
+			writeResponse(writer, response) // writing it back
+			
+
 					
 			// debugging
 			// logger.Printf("raw contents: %s", string(contents))
 		
 	}
+}
 
+
+
+func writeResponse(writer io.Writer, msg any) {
+	reply := rpc.EncodeMessage(msg)
+	writer.Write([]byte(reply)) // this is going to take the stdout of the current process and reply back with this a sequence of bytes
 }
 
 func getLogger(filename string) *log.Logger {
