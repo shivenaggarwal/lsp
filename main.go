@@ -82,15 +82,7 @@ func HandleMessage(logger *log.Logger, writer io.Writer, state compiler.State, m
 			}
 			
 			// create a response and write it back
-			response := lsp.HoverResponse{ // creating a response
-			Response: lsp.Response{
-				RPC: "2.0",
-				ID: &request.ID,
-			},
-			Result: lsp.HoverResult{
-				Contents: "hi from tiny lsp",
-			},
-			}
+			response := state.Hover(request.ID, request.Params.TextDocument.URI, request.Params.Position) // creating a response
 
 			writeResponse(writer, response) // writing it back
 			
