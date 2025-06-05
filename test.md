@@ -10,3 +10,5 @@ does it do anything cool?
 not really.  
 does it exist purely so i can say "look, i made a thing"?  
 yeah, basically.
+
+this file has no purpose other than boosting my ego.

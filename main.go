@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"encoding/json"
 	"log"
+	"lsp/compiler"
 	"lsp/lsp"
 	"lsp/rpc"
 	"os"
@@ -16,6 +17,8 @@ func main() {
 	scanner := bufio.NewScanner(os.Stdin) // reading input from stdin
 	scanner.Split(rpc.Split)              // now this is going to be waiting on stdout for the new msg and once we get that the scanner will give use the text and then we can handle it below
 
+	state := compiler.NewState()
+
 	for scanner.Scan() { // basically saying keep on running it until we are ready
 		msg := scanner.Bytes()
 		method, contents, err := rpc.DecodeMessage(msg)
@@ -23,11 +26,11 @@ func main() {
 			logger.Panicf("got an error: %s", err)
 			continue
 		}
-		HandleMessage(logger, method, contents)
+		HandleMessage(logger, state, method, contents)
 	}
 }
 
-func HandleMessage(logger *log.Logger, method string, contents []byte) {
+func HandleMessage(logger *log.Logger, state compiler.State, method string, contents []byte) {
 	logger.Printf("received message with method: %s", method) // this just makes sure everytime we get a message we print the message, lets us know are we decoding msg and passing them forward correctly
 	
 	switch method {
@@ -52,10 +55,25 @@ func HandleMessage(logger *log.Logger, method string, contents []byte) {
 		case "textDocument/didOpen":
 			var request lsp.DidOpenTextDocumentNotification
 			if err:= json.Unmarshal(contents, &request); err != nil {
-			logger.Printf("hey, couldn't parse this: %s", err)
+			logger.Printf("textDocument/didOpen: %s", err)
+			return
 			}
-			logger.Printf("Opened: %s %s", request.Params.TextDocument.URI, request.Params.TextDocument.Text)
+			// logger.Printf("Opened: %s %s", request.Params.TextDocument.URI, request.Params.TextDocument.Text)
+			logger.Printf("Opened: %s", request.Params.TextDocument.URI)
+			state.OpenDocument(request.Params.TextDocument.URI, request.Params.TextDocument.Text)
 			
+		case "textDocument/didChange":
+			var request lsp.TextDocumentDidChangeNotification
+			if err:= json.Unmarshal(contents, &request); err != nil {
+			logger.Printf("textDocument/didChange: %s", err)
+			return
+			}
+			logger.Printf("Changed: %s", request.Params.TextDocument.URI)
+			for _, change := range request.Params.ContentChanges{
+				state.UpdateDocument(request.Params.TextDocument.URI, change.Text)
+			}
+
+					
 			// debugging
 			// logger.Printf("raw contents: %s", string(contents))
 		
