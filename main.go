@@ -98,7 +98,17 @@ func HandleMessage(logger *log.Logger, writer io.Writer, state compiler.State, m
 
 			writeResponse(writer, response) // writing it back
 			
+		case "textDocument/codeAction":
+			var request lsp.DefinitionRequest
+			if err:= json.Unmarshal(contents, &request); err != nil {
+			logger.Printf("textDocument/codeAction: %s", err)
+			return
+			}
+			
+			// create a response and write it back
+			response := state.TextDocumentCodeAction(request.ID, request.Params.TextDocument.URI) // creating a response
 
+			writeResponse(writer, response) // writing it back
 					
 			// debugging
 			// logger.Printf("raw contents: %s", string(contents))
