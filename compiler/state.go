@@ -16,12 +16,16 @@ func NewState() State{
 	return State{Documents: map[string]string{}}
 }
 
-func (s *State) OpenDocument(uri, text string) {
+func (s *State) OpenDocument(uri, text string) []lsp.Diagnostic {
 	s.Documents[uri] = text
+	
+	return []lsp.Diagnostic{}
 }
 
-func (s *State) UpdateDocument(uri, text string) {
+func (s *State) UpdateDocument(uri, text string) []lsp.Diagnostic {
 	s.Documents[uri] = text
+
+	return []lsp.Diagnostic{}
 }
 
 func (s *State) Hover(id int, uri string, position lsp.Position) lsp.HoverResponse {
@@ -237,6 +241,23 @@ func (s *State) TextDocumentCodeAction(id int, uri string) lsp.TextDocumentCodeA
 	}
 }
 
+func (s *State) TextDocumentCompletion(id int, uri string) lsp.CompletionResponse {
+
+	// ask your static analysis tools to figure out good completions
+	items := []lsp.CompletionItem{
+	
+	}
+
+	response := lsp.CompletionResponse{
+		Response: lsp.Response{
+			RPC: "2.0",
+			ID:  &id,
+		},
+		Result: items,
+	}
+
+	return response
+}
 
 func LineRange(line, start, end int) lsp.Range {
 	return lsp.Range{
