@@ -1,8 +1,5 @@
 # this is a test (markdown) file
 
-
-<!-- TODO: add real content to this file -->
-
 congratulations.  
 you’ve just opened **the** most underwhelming markdown file on the internet.
 
@@ -16,4 +13,4 @@ yeah, basically.
 
 this file has no purpose other than boosting my ego.
 
-VS Code sucks
+VS Code sucks!

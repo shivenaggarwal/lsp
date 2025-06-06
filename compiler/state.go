@@ -64,7 +64,7 @@ func getDiagnosticsForFile(text string) []lsp.Diagnostic {
 				Range:    LineRange(row, idx, idx+len("not really")),
 				Severity: 3,
 				Source:   "VibeCheck",
-				Message:  "Low-energy response detected. Inject more chaos.",
+				Message:  "Low-energy response detected.",
 			})
 		}
 
